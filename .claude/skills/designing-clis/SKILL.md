@@ -1,7 +1,7 @@
 ---
 name: designing-clis
 description: >
-  Covers the command-fence binary's command line in crates/command-fence/src/main.rs: the clap derive
+  Covers the command line in crates/command-fence/src/main.rs: the clap derive
   declaration (a Subcommand enum per noun, doc comments as --help text), the thin
   handler that composes the real adapters, calls one core method, and prints a view,
   stdout for data and stderr for error: and warning: lines, exit codes (0 success, 1 the

@@ -36,23 +36,28 @@ floor.
 
 ## Product
 
-This section is the one part of this file about the application rather than the
-harness: without it, an agent implementing an issue here has no in-repo answer to "is
-this in scope?". The owner writes each bullet (the `starting-an-app` skill says how);
-`just check-harness` fails while one still holds its `TODO` marker.
-
-- **What it is, and who it is for** — TODO: one paragraph. The problem it solves, and
-  whose problem that is.
-- **The core interaction** — TODO: the one thing a user does most. If the app does not
-  do this well, nothing else about it matters.
-- **Non-goals** — TODO: what this app deliberately does not do, even where it would be
-  easy. A first version's cut list is longer than its feature list, and this is the
-  line an eager implementer crosses first: moving anything from here to a goal is a
-  human's decision, not an implementer's.
-- **Where these decisions are recorded** — TODO: where the reasoning behind the three
-  entries above lives — an ADR under `docs/architecture/` (see "Before changing the
-  architecture"), a design issue, or another decision log — so a reader can find why
-  and not only what.
+- **What it is, and who it is for** — CommandFence is a personal macOS CLI that helps
+  this Mac's owner prevent AI-agent command mistakes. It uses the official signed Santa
+  engine to deny a selected execution before it starts. The first rule matches `/bin/ls`
+  with exactly one argument: the configured owner's absolute home path. CommandFence
+  manages configuration; Santa performs enforcement across its execution-authorization
+  coverage. Live feasibility remains unverified until the safe PoC passes.
+- **The core interaction** — Edit `~/.config/command-fence/config.json`, validate and
+  preview it, explicitly apply or remove the owned rule with administrator privileges,
+  and inspect engine, rule, and manual execution-test evidence. The first version has
+  five plain CLI operations and requires no resident CommandFence process.
+- **Non-goals** — No first-version GUI/TUI or resident CommandFence process, automatic
+  elevation/reload, installation or permission changes, general prevention of directory
+  enumeration, deliberate tamper resistance, extra patterns before the first PoC passes,
+  cloud/fleet management, distribution/release pipeline, or dangerous command tests.
+  Preserve existing Santa policy and all project gates. The inherited counter/TUI is
+  scaffold code to replace during implementation, not CommandFence product scope.
+- **Where these decisions are recorded** — Scope and acceptance are in
+  [requirements](docs/product/requirements.md), operations in
+  [CLI flows](docs/product/ux-flows.md), output policy in
+  [UX guidelines](docs/design/ux-guidelines.md), and presentation references in
+  [design direction](docs/design/design-direction.md). Later architecture decisions use
+  Proposed ADRs under `docs/architecture/`; only the human accepts an ADR.
 
 ## Quick Reference
 

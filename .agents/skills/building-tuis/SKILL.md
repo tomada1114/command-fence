@@ -1,7 +1,7 @@
 ---
 name: building-tuis
 description: >
-  Covers the full-screen terminal UI behind command-fence tui: the screen's model and update in
+  Covers the terminal UI behind command-fence tui: model and update in
   command-fence-core (a ...Screen value, a ScreenAction per user intent, a ScreenKey that names
   no terminal library, update(self, action, service) returning the next screen), the
   binary's crates/command-fence/src/tui/ (mod.rs enters raw mode and the alternate screen, runs

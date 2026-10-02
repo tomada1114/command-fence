@@ -4,18 +4,24 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tomada1114/command-fence/badge)](https://scorecard.dev/viewer/?uri=github.com/tomada1114/command-fence)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A personal Rust command-line tool: one binary, `command-fence`, whose clap
-subcommands do the work and whose `tui` subcommand opens a full-screen ratatui view over
-the same core, built and run on macOS and Linux. It ships as a working counter —
-persisted state, an injected clock, subcommands and a terminal view over one core — with
-coverage floors, architecture boundaries that fail a build, and supply-chain-hardened
-CI, all from the first commit.
+CommandFence is a personal macOS CLI for preventing selected AI-agent command mistakes.
+The planned first rule rejects `/bin/ls` when its sole argument is the configured
+owner's absolute home path. The official signed Santa engine performs execution
+control; CommandFence validates configuration, previews and manually applies/removes
+its owned rule, and reports the available evidence.
 
-It runs on macOS (Apple Silicon) and Linux. Windows, a release
-pipeline or release artifacts, crates.io publishing, and localization are
-non-goals.
+**Implementation status:** initialized scaffold and agreed product documents. The five
+CommandFence commands and live Santa blocking are not implemented or verified yet.
+The inherited counter, optional model adapter, and TUI remain as template examples to
+replace during implementation. They do not add product requirements. There is no
+first-version TUI, resident CommandFence process, or distribution pipeline.
 
-## Quickstart
+Start with the [requirements](docs/product/requirements.md),
+[CLI flows](docs/product/ux-flows.md), and [roadmap](docs/architecture/roadmap.md).
+
+## Development quickstart
+
+These commands exercise the inherited scaffold while CommandFence is being built.
 
 Prerequisites: macOS on Apple Silicon with the Xcode Command Line Tools
 (`xcode-select --install`), or Linux with a C toolchain for the linker (`build-essential`
@@ -28,7 +34,7 @@ cd command-fence
 mise trust     # approve mise.toml once (mise asks before using an untrusted config)
 just install   # pinned tools via mise and lefthook's git hook
 just check     # everything the machine can run without a human; takes over no terminal
-cargo run --locked -p command-fence -- counter show   # the tool itself
+cargo run --locked -p command-fence -- counter show   # inherited sample
 ```
 
 rustup installs the Rust toolchain `rust-toolchain.toml` names the first time `cargo`
@@ -38,7 +44,8 @@ runs (`RUSTUP_AUTO_INSTALL`, on by default:
 install is reported with the command to run. `cargo run --locked -p command-fence -- tui` opens
 the full-screen view in the terminal you run it from; `q` quits.
 
-For apps that need a model, enable the optional `openrouter` Cargo feature. See
+The inherited optional `openrouter` Cargo feature is a template example, outside
+CommandFence scope. See
 [OpenRouter](docs/openrouter.md) for the key setup, `command-fence llm ask`, and reuse from a
 CLI or TUI action. The default build needs no API key.
 
