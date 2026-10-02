@@ -1,6 +1,6 @@
 # ADR-0002: Capture JSON v1 and generate one literal rule
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-10-02
 - **Date:** 2026-10-02
 - **Deciders:** the owner
 

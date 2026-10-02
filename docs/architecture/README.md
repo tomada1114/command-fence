@@ -58,15 +58,16 @@ nothing. It starts as a skeleton; `steering-the-roadmap` is the skill that chang
 
 ## Decisions
 
-The [CommandFence design proposal](../architecture.md#commandfence-design-proposal)
-maps these records to the inherited layers. Every initial ADR remains Proposed; the
-owner's product-direction approval does not itself accept a record or authorize live
-work. The [safe PoC](safe-poc.md) holds the first runtime acceptance gate.
+The [CommandFence design](../architecture.md#commandfence-design-proposal)
+maps these records to the inherited layers. The owner accepted all five initial ADRs
+on 2026-10-02. The [safe PoC](safe-poc.md) holds the first runtime acceptance gate;
+its concrete private live-work package still needs review before installation,
+OS grants, rule changes, or human tests.
 
 | ADR | Decision | Status |
 |---|---|---|
-| [0001](adr/0001-signed-santa-and-human-poc.md) | Signed Santa, privilege boundary, human PoC | Proposed |
-| [0002](adr/0002-json-config-and-literal-rule.md) | JSON v1 capture and literal rule generation | Proposed |
-| [0003](adr/0003-owned-state-and-conservative-mutations.md) | Root-owned receipt, conflict handling, targeted recovery | Proposed |
-| [0004](adr/0004-synchronous-ports-and-evidence-status.md) | Synchronous domain ports and evidence status | Proposed |
-| [0005](adr/0005-cli-shape-and-presentation-lock.md) | Five-command CLI and presentation lock | Proposed |
+| [0001](adr/0001-signed-santa-and-human-poc.md) | Signed Santa, privilege boundary, human PoC | Accepted 2026-10-02 |
+| [0002](adr/0002-json-config-and-literal-rule.md) | JSON v1 capture and literal rule generation | Accepted 2026-10-02 |
+| [0003](adr/0003-owned-state-and-conservative-mutations.md) | Root-owned receipt, conflict handling, targeted recovery | Accepted 2026-10-02 |
+| [0004](adr/0004-synchronous-ports-and-evidence-status.md) | Synchronous domain ports and evidence status | Accepted 2026-10-02 |
+| [0005](adr/0005-cli-shape-and-presentation-lock.md) | Five-command CLI and presentation lock | Accepted 2026-10-02 |

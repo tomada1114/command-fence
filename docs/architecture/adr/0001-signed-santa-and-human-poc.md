@@ -1,6 +1,6 @@
 # ADR-0001: Use signed Santa and gate feasibility with a human PoC
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-10-02
 - **Date:** 2026-10-02
 - **Deciders:** the owner
 

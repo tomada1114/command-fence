@@ -9,7 +9,7 @@ ever ships releases — is recorded as ADRs under [`docs/architecture/`](archite
 
 ## CommandFence design proposal
 
-Status: Proposed, 2026-10-02. This section describes the intended product; the layers
+Status: Accepted, 2026-10-02. This section describes the intended product; the layers
 below still document the implemented template scaffold. The five product commands,
 owned-rule storage, and Santa enforcement have not been implemented or verified.
 Scope is fixed by the [requirements](product/requirements.md); acceptance of an ADR
@@ -39,7 +39,7 @@ flowchart LR
   Santa --> Exec[Execution authorization]
 ```
 
-Module paths and port names below are proposed implementation homes, not current APIs.
+Module paths and port names below are planned implementation homes, not current APIs.
 
 | Responsibility | Home | Boundary |
 |---|---|---|
@@ -74,8 +74,8 @@ unsupported representations stop privileged operations rather than being discard
 No actual local config, baseline, receipt, manual report, permission file, or backup
 belongs in this public checkout.
 
-Initial v1 field layouts below are proposals to pin in fixtures. Unknown versions and
-duplicate fields are rejected; absent observations use null, not a default success.
+The accepted initial v1 field layouts below must be pinned in fixtures. Unknown versions
+and duplicate fields are rejected; absent observations use null, not a default success.
 
 | Record/group | Fields and types |
 |---|---|
@@ -116,12 +116,12 @@ and pending journal, exit 1, and require human inspection. No further mutation r
 an unresolved journal. A crash after receipt commit is reconciled read-only against
 the journal generation; no automatic engine operation follows.
 
-The local lease does not exclude other Santa administrators. The proposed operating
+The local lease does not exclude other Santa administrators. The accepted operating
 precondition is a human-controlled window with no other rule writer, followed by
 fresh comparisons. The inspected CLI offers no conditional replace/remove operation;
 this design cannot eliminate the interval between the last check and the write.
 [ADR-0003](architecture/adr/0003-owned-state-and-conservative-mutations.md) leaves this
-limitation explicit for owner review.
+limitation explicit.
 
 `status`: collect ordinary engine JSON plus a trusted historical receipt and optional
 manual summary → core classifies each observation → render text or JSON. Ordinary
@@ -162,7 +162,7 @@ success report ([UX contract](design/ux-guidelines.md)).
 | Gates preserve the owner's desktop and existing checks | `just check`; no live Santa, TTY, notification, or OS grant in a gate. |
 | The exact target is denied before execution and controls retain baseline behavior | Human PoC matrix with Santa-correlated decision evidence and targeted recovery. |
 
-The [ADR index](architecture/README.md#decisions) holds all five proposals, including
+The [ADR index](architecture/README.md#decisions) holds all five accepted decisions, including
 the [plain CLI presentation lock](architecture/adr/0005-cli-shape-and-presentation-lock.md).
 The [roadmap](architecture/roadmap.md) keeps the two already approved Now outcomes.
 

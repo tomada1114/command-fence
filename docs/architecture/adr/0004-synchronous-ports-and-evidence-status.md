@@ -1,6 +1,6 @@
 # ADR-0004: Use synchronous ports and separate evidence in status
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-10-02
 - **Date:** 2026-10-02
 - **Deciders:** the owner
 

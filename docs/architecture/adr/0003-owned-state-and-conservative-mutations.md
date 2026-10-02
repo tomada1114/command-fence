@@ -1,6 +1,6 @@
 # ADR-0003: Keep trusted ownership state and stop on uncertain mutations
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-10-02
 - **Date:** 2026-10-02
 - **Deciders:** the owner
 

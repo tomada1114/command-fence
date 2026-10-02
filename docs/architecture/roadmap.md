@@ -2,11 +2,11 @@
 
 This page records the initial direction approved during kickoff. Product scope is in
 [AGENTS.md](../../AGENTS.md#product) and [requirements](../product/requirements.md).
-The initial backlog is filed under the two tracking outcomes below. Implementation
-still waits for the listed Proposed ADRs to be accepted; live setup and testing retain
-their separate approval scope. This direction grants no live-engine permission.
-The [design proposal](../architecture.md#commandfence-design-proposal) and
-[five Proposed ADRs](README.md#decisions) describe the implementation; they do not
+The initial backlog is filed under the two tracking outcomes below. The owner accepted
+the five initial ADRs on 2026-10-02, so implementation can start with the first issue.
+The concrete private live-work package still needs review before live setup and testing.
+The [design](../architecture.md#commandfence-design-proposal) and
+[five accepted ADRs](README.md#decisions) describe the implementation; they do not
 change these approved horizons.
 
 - **Last reviewed:** 2026-10-02; nine kickoff issues are open (two tracking, seven work).
@@ -16,9 +16,9 @@ change these approved horizons.
 - **Prove the first harmless execution rule.** Done when the separately approved,
   human-run [PoC matrix](../product/requirements.md#34-safe-poc-acceptance-gate) shows
   pre-execution denial across the tested launch contexts, allows its controls, and
-  restores the baseline while preserving unrelated policy. Before live work: accept
-  the relevant engine/configuration/privilege ADRs and approve the concrete setup,
-  payload, and recovery procedure. Runtime feasibility is currently unverified.
+  restores the baseline while preserving unrelated policy. Before live work: approve
+  the concrete setup, payload, and recovery procedure. Runtime feasibility is currently
+  unverified.
   The detailed [human procedure](safe-poc.md) requires a concrete private live package.
   Tracking: [#2](https://github.com/tomada1114/command-fence/issues/2). The human PoC
   remains [externally blocked](https://github.com/tomada1114/command-fence/issues/8).

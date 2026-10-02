@@ -1,6 +1,6 @@
 # Safe PoC: one harmless execution rule
 
-Status: Proposed human procedure, 2026-10-02. Nothing on this page has been run.
+Status: Accepted human procedure, 2026-10-02. Nothing on this page has been run.
 It implements [requirements §3.4](../product/requirements.md#34-safe-poc-acceptance-gate)
 and [ADR-0001](adr/0001-signed-santa-and-human-poc.md). No routine gate performs live
 setup, rule writes, denied executions, notifications, or desktop interaction.
@@ -24,8 +24,8 @@ Prepare a private approval package containing:
   prior-owned-content recovery procedure. The human confirms an exclusive rule-change
   window; no other tool or administrator changes Santa policy during the operation.
 
-Accept the relevant ADRs and obtain explicit approval for that exact live package
-before installation, grants, application, or tests. A package download or preview is
+The relevant ADRs were accepted on 2026-10-02. Obtain explicit approval for that exact
+live package before installation, grants, application, or tests. A package download or preview is
 not installation approval. If policy is managed, conflicting, or unknown, stop;
 do not disable management or delete a foreign rule to continue.
 

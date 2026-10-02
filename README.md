@@ -18,8 +18,8 @@ first-version TUI, resident CommandFence process, or distribution pipeline.
 
 Start with the [requirements](docs/product/requirements.md),
 [CLI flows](docs/product/ux-flows.md),
-[design proposal](docs/architecture.md#commandfence-design-proposal),
-[Proposed ADRs](docs/architecture/README.md#decisions), and
+[design](docs/architecture.md#commandfence-design-proposal),
+[accepted ADRs](docs/architecture/README.md#decisions), and
 [roadmap](docs/architecture/roadmap.md). The
 [safe PoC procedure](docs/architecture/safe-poc.md) requires separate live-work approval.
 
@@ -62,7 +62,7 @@ why it was there in the first place.
 
 The agreed product keeps configuration and explicit operations in a small Rust CLI
 and delegates execution authorization to the official signed engine. This avoids a
-new resident CommandFence service. The five Proposed
+new resident CommandFence service. The five accepted
 [ADRs](docs/architecture/README.md#decisions) record the implementation choices and
 their limits; the [human PoC](docs/architecture/safe-poc.md) must establish runtime
 feasibility. The remaining philosophy describes the inherited development foundation.

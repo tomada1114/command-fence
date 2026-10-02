@@ -1,6 +1,6 @@
 # ADR-0005: Keep five plain CLI operations and lock their presentation
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-10-02
 - **Date:** 2026-10-02
 - **Deciders:** the owner
 
