@@ -138,6 +138,53 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486"
 
 [[package]]
+name = "command-fence"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "command-fence-core",
+ "command-fence-platform",
+ "command-fence-test-support",
+ "ratatui",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
+name = "command-fence-core"
+version = "0.1.0"
+dependencies = [
+ "command-fence-test-support",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "command-fence-platform"
+version = "0.1.0"
+dependencies = [
+ "command-fence-core",
+ "command-fence-test-support",
+ "dotenvy",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "ureq",
+]
+
+[[package]]
+name = "command-fence-test-support"
+version = "0.1.0"
+dependencies = [
+ "command-fence-core",
+]
+
+[[package]]
 name = "compact_str"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -727,53 +774,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys",
-]
-
-[[package]]
-name = "myapp"
-version = "0.1.0"
-dependencies = [
- "clap",
- "myapp-core",
- "myapp-platform",
- "myapp-test-support",
- "ratatui",
- "tempfile",
- "tracing",
-]
-
-[[package]]
-name = "myapp-core"
-version = "0.1.0"
-dependencies = [
- "myapp-test-support",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "myapp-platform"
-version = "0.1.0"
-dependencies = [
- "dotenvy",
- "myapp-core",
- "myapp-test-support",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "ureq",
-]
-
-[[package]]
-name = "myapp-test-support"
-version = "0.1.0"
-dependencies = [
- "myapp-core",
 ]
 
 [[package]]

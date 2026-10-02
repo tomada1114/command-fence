@@ -1,17 +1,17 @@
 //! The core boundary holds, and its three lists agree:
 //!
-//! 1. `myapp-core`'s dependency closure over normal and build edges (no dev-dependency,
+//! 1. `command-fence-core`'s dependency closure over normal and build edges (no dev-dependency,
 //!    across every target, from `cargo metadata`'s resolved graph) contains none of
 //!    [`FORBIDDEN_IN_CORE`]. A build edge counts because a `[build-dependencies]` crate
 //!    compiles and runs on every build of core, so `objc2` there ties
 //!    core to the platform as surely as a normal edge. The walk stops at the first
 //!    forbidden crate on a path, so each violation names the crate to remove and how core
 //!    reaches it, marking a build edge `-(build)->`.
-//! 2. `myapp-test-support` is never a normal, optional, or build-dependency of a workspace
+//! 2. `command-fence-test-support` is never a normal, optional, or build-dependency of a workspace
 //!    crate: test-only code never ships.
 //! 3. The crates AGENTS.md's boundary sentence names ("… normal and build dependency
 //!    closure reaches `a`, `b`, or `c`.") equal [`FORBIDDEN_IN_CORE`], and `deny.toml`'s
-//!    `[bans] deny` wrapper entries are the boundary's: `myapp-platform` → `myapp` (the
+//!    `[bans] deny` wrapper entries are the boundary's: `command-fence-platform` → `command-fence` (the
 //!    binary) only.
 //!
 //! The graph comes from `cargo metadata --format-version 1 --locked --offline` run in the
@@ -40,14 +40,14 @@ const FORBIDDEN_IN_CORE: [&str; 4] = [
     "objc2*",
     "core-foundation*",
     "security-framework*",
-    "myapp-platform",
+    "command-fence-platform",
 ];
 
-const CORE: &str = "myapp-core";
-const TEST_SUPPORT: &str = "myapp-test-support";
+const CORE: &str = "command-fence-core";
+const TEST_SUPPORT: &str = "command-fence-test-support";
 /// The boundary's direct-edge rule: the only crates that may depend on each of these
 /// directly.
-const WRAPPERS: [(&str, &[&str]); 1] = [("myapp-platform", &["myapp"])];
+const WRAPPERS: [(&str, &[&str]); 1] = [("command-fence-platform", &["command-fence"])];
 const METADATA_ARGS: [&str; 5] = ["metadata", "--format-version", "1", "--locked", "--offline"];
 const THIS: &str = "xtask/src/check_harness/core_boundary.rs";
 
@@ -84,9 +84,9 @@ fn metadata_command() -> String {
 fn metadata_violation(actual: impl Into<String>) -> FailureDetails {
     finding(
         "ERR_CHECK_CORE_BOUNDARY_METADATA",
-        "cargo metadata could not give myapp-core's dependency graph",
+        "cargo metadata could not give command-fence-core's dependency graph",
         format!(
-            "`{}` to print the workspace's resolved graph, with myapp-core a member",
+            "`{}` to print the workspace's resolved graph, with command-fence-core a member",
             metadata_command()
         ),
         actual,
@@ -301,7 +301,7 @@ fn closure_violations(metadata: &CargoMetadata) -> Vec<FailureDetails> {
                 format!("{CORE}'s dependency closure reaches {name} (forbidden as `{pattern}`)"),
                 format!("no {} among {CORE}'s normal or build dependencies, direct or transitive", forbidden.join(", ")),
                 format!("dependency path: {path}"),
-                format!("remove the edge that brings {name} into core (crates/{CORE}/Cargo.toml's [dependencies] or [build-dependencies], or a dependency's features); OS code belongs in myapp-platform behind a port"),
+                format!("remove the edge that brings {name} into core (crates/{CORE}/Cargo.toml's [dependencies] or [build-dependencies], or a dependency's features); OS code belongs in command-fence-platform behind a port"),
             ));
         }
     }
@@ -329,7 +329,7 @@ fn test_support_violations(metadata: &CargoMetadata) -> Vec<FailureDetails> {
                         format!("{} takes {TEST_SUPPORT} as {edge}", package.name),
                         format!("{TEST_SUPPORT} only under [dev-dependencies] (test-only code never ships)"),
                         format!("{}'s Cargo.toml declares {TEST_SUPPORT} as {edge}", package.name),
-                        format!("move {TEST_SUPPORT} to {}'s [dev-dependencies]; a fake the shipped code needs is a real adapter in myapp-platform instead", package.name),
+                        format!("move {TEST_SUPPORT} to {}'s [dev-dependencies]; a fake the shipped code needs is a real adapter in command-fence-platform instead", package.name),
                     )
                 })
         })
@@ -393,7 +393,7 @@ fn agents_violations(input: &Input<'_>) -> Vec<FailureDetails> {
     if listed.is_empty() {
         return vec![unparsed(
             "AGENTS.md's forbidden-crate list could not be read",
-            "a sentence in AGENTS.md › Architecture: \"… normal and build dependency closure reaches `objc2*`, … or `myapp-platform`.\"",
+            "a sentence in AGENTS.md › Architecture: \"… normal and build dependency closure reaches `objc2*`, … or `command-fence-platform`.\"",
             "no such sentence, or one naming no backticked crate",
         )];
     }
@@ -577,7 +577,7 @@ mod tests {
         "/tests/fixtures/core-boundary/pass"
     );
     const REG: &str = "registry+https://github.com/rust-lang/crates.io-index";
-    const AGENTS_MD: &str = "## Architecture\n\n- The core boundary is enforced three times, so removing one layer leaves the others:\n  core's `Cargo.toml` lists no OS or platform crate; `deny.toml`'s `[bans]`\n  `wrappers` let only `myapp` depend on `myapp-platform`; and a harness check fails when core's\n  normal and build dependency closure reaches `objc2*`, `core-foundation*`,\n  `security-framework*`, or `myapp-platform`. Those lists change together.";
+    const AGENTS_MD: &str = "## Architecture\n\n- The core boundary is enforced three times, so removing one layer leaves the others:\n  core's `Cargo.toml` lists no OS or platform crate; `deny.toml`'s `[bans]`\n  `wrappers` let only `command-fence` depend on `command-fence-platform`; and a harness check fails when core's\n  normal and build dependency closure reaches `objc2*`, `core-foundation*`,\n  `security-framework*`, or `command-fence-platform`. Those lists change together.";
 
     fn copy_pass() -> tempfile::TempDir {
         let dir = temp_dir();
@@ -706,7 +706,7 @@ mod tests {
         actual.sort_unstable();
         let mut expected = vec![
             "core-foundation*",
-            "myapp-platform",
+            "command-fence-platform",
             "objc2*",
             "security-framework*",
         ];
@@ -717,9 +717,9 @@ mod tests {
     #[test]
     fn allows_dependencies_outside_the_os_boundary() {
         for (from, kind) in [
-            ("myapp-core", None),
+            ("command-fence-core", None),
             ("serde", None),
-            ("myapp-core", Some("build")),
+            ("command-fence-core", Some("build")),
         ] {
             let dir = copy_pass();
             edit_metadata(dir.path(), |m| add_edge(m, from, "renderer", kind, false));
@@ -733,11 +733,11 @@ mod tests {
             "objc2-foundation",
             "core-foundation-sys",
             "security-framework",
-            "myapp-platform",
+            "command-fence-platform",
         ] {
             let dir = copy_pass();
             edit_metadata(dir.path(), |m| {
-                add_edge(m, "myapp-core", "bridge", None, false);
+                add_edge(m, "command-fence-core", "bridge", None, false);
                 add_edge(m, "bridge", krate, None, false);
             });
             let found = check(dir.path());
@@ -746,33 +746,33 @@ mod tests {
                 ["ERR_CHECK_CORE_BOUNDARY_CLOSURE"],
                 "{krate}"
             );
-            assert!(text(&found).contains(&format!("myapp-core -> bridge -> {krate}")));
+            assert!(text(&found).contains(&format!("command-fence-core -> bridge -> {krate}")));
         }
         let dir = copy_pass();
         edit_metadata(dir.path(), |m| {
-            add_edge(m, "myapp-core", "objc2", None, false);
-            add_edge(m, "myapp-core", "security-framework", None, false);
+            add_edge(m, "command-fence-core", "objc2", None, false);
+            add_edge(m, "command-fence-core", "security-framework", None, false);
         });
         let found = check(dir.path());
         assert_eq!(codes(&found), ["ERR_CHECK_CORE_BOUNDARY_CLOSURE"; 2]);
-        assert!(text(&found).contains("myapp-core -> security-framework"));
+        assert!(text(&found).contains("command-fence-core -> security-framework"));
     }
 
     #[test]
     fn follows_normal_and_build_edges_but_no_dev_edge() {
-        for (from, to) in [("myapp-core", "objc2"), ("serde", "objc2")] {
+        for (from, to) in [("command-fence-core", "objc2"), ("serde", "objc2")] {
             let dir = copy_pass();
             edit_metadata(dir.path(), |m| add_edge(m, from, to, Some("dev"), false));
             assert_eq!(check(dir.path()), []);
         }
-        for krate in ["objc2", "security-framework", "myapp-platform"] {
+        for krate in ["objc2", "security-framework", "command-fence-platform"] {
             let dir = copy_pass();
             edit_metadata(dir.path(), |m| {
-                add_edge(m, "myapp-core", krate, Some("build"), false);
+                add_edge(m, "command-fence-core", krate, Some("build"), false);
             });
             let found = check(dir.path());
             assert_eq!(codes(&found), ["ERR_CHECK_CORE_BOUNDARY_CLOSURE"]);
-            assert!(text(&found).contains(&format!("myapp-core -(build)-> {krate}")));
+            assert!(text(&found).contains(&format!("command-fence-core -(build)-> {krate}")));
         }
         let dir = copy_pass();
         edit_metadata(dir.path(), |m| {
@@ -782,7 +782,8 @@ mod tests {
         let found = check(dir.path());
         assert_eq!(codes(&found), ["ERR_CHECK_CORE_BOUNDARY_CLOSURE"]);
         assert!(
-            text(&found).contains("myapp-core -> serde -(build)-> helper -> core-foundation-sys")
+            text(&found)
+                .contains("command-fence-core -> serde -(build)-> helper -> core-foundation-sys")
         );
     }
 
@@ -793,7 +794,11 @@ mod tests {
             m["workspace_members"]
                 .as_array_mut()
                 .expect("members")
-                .retain(|id| !id.as_str().unwrap_or_default().contains("myapp-core"));
+                .retain(|id| {
+                    !id.as_str()
+                        .unwrap_or_default()
+                        .contains("command-fence-core")
+                });
         });
         assert!(codes(&check(dir.path())).contains(&"ERR_CHECK_CORE_BOUNDARY_METADATA".to_owned()));
         let dir = copy_pass();
@@ -806,11 +811,17 @@ mod tests {
         for (kind, optional) in [(None, false), (None, true), (Some("build"), false)] {
             let dir = copy_pass();
             edit_metadata(dir.path(), |m| {
-                add_edge(m, "myapp-platform", "myapp-test-support", kind, optional);
+                add_edge(
+                    m,
+                    "command-fence-platform",
+                    "command-fence-test-support",
+                    kind,
+                    optional,
+                );
             });
             let found = check(dir.path());
             assert_eq!(codes(&found), ["ERR_CHECK_TEST_SUPPORT_NOT_DEV"]);
-            assert!(text(&found).contains("myapp-platform"));
+            assert!(text(&found).contains("command-fence-platform"));
         }
     }
 
@@ -848,14 +859,19 @@ mod tests {
         edit_file(
             dir.path(),
             "deny.toml",
-            "[\"myapp\"]",
-            "[\"myapp\", \"myapp-core\"]",
+            "[\"command-fence\"]",
+            "[\"command-fence\", \"command-fence-core\"]",
         );
         let found = check(dir.path());
         assert_eq!(codes(&found), ["ERR_CHECK_CORE_BOUNDARY_WRAPPERS"]);
-        assert!(text(&found).contains("myapp-core"));
+        assert!(text(&found).contains("command-fence-core"));
         let dir = copy_pass();
-        edit_file(dir.path(), "deny.toml", "[\"myapp\"]", "[\"myapp-core\"]");
+        edit_file(
+            dir.path(),
+            "deny.toml",
+            "[\"command-fence\"]",
+            "[\"command-fence-core\"]",
+        );
         assert_eq!(
             codes(&check(dir.path())),
             ["ERR_CHECK_CORE_BOUNDARY_WRAPPERS"]
@@ -864,16 +880,16 @@ mod tests {
         edit_file(
             dir.path(),
             "deny.toml",
-            "{ crate = \"myapp-platform\", wrappers = [\"myapp\"] },",
-            "\"myapp-platform\",",
+            "{ crate = \"command-fence-platform\", wrappers = [\"command-fence\"] },",
+            "\"command-fence-platform\",",
         );
         let banned = check(dir.path());
         assert_eq!(codes(&banned), ["ERR_CHECK_CORE_BOUNDARY_WRAPPERS"]);
         assert!(text(&banned).contains("banned outright"));
-        edit_file(dir.path(), "deny.toml", "\"myapp-platform\",", "");
+        edit_file(dir.path(), "deny.toml", "\"command-fence-platform\",", "");
         let missing = check(dir.path());
         assert_eq!(codes(&missing), ["ERR_CHECK_CORE_BOUNDARY_WRAPPERS"]);
-        assert!(text(&missing).contains("no entry for myapp-platform"));
+        assert!(text(&missing).contains("no entry for command-fence-platform"));
         for content in ["bans = = 1\n", "[bans]\nwildcards = 'deny'\n"] {
             write(dir.path(), "deny.toml", content);
             assert_eq!(

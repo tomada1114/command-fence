@@ -2,7 +2,7 @@
 [bans]
 multiple-versions = "warn"
 deny = [
-  { crate = "myapp-platform", wrappers = ["myapp"] },
+  { crate = "command-fence-platform", wrappers = ["command-fence"] },
   # An unrelated ban is ignored by the check.
   { crate = "openssl" },
 ]

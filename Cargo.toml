@@ -11,9 +11,9 @@ publish = false
 
 # The only place a dependency version is written (managing-dependencies skill).
 [workspace.dependencies]
-myapp-core = { path = "crates/myapp-core" }
-myapp-platform = { path = "crates/myapp-platform" }
-myapp-test-support = { path = "crates/myapp-test-support" }
+command-fence-core = { path = "crates/command-fence-core" }
+command-fence-platform = { path = "crates/command-fence-platform" }
+command-fence-test-support = { path = "crates/command-fence-test-support" }
 clap = { version = "4.6", default-features = false, features = ["std", "derive", "help", "usage", "error-context"] }
 # Optional OpenRouter adapter: parse a local credential file without changing process
 # environment, and use blocking HTTPS/JSON without an async runtime or compression.
