@@ -4,6 +4,9 @@ This page records the initial direction approved during kickoff. Product scope i
 [AGENTS.md](../../AGENTS.md#product) and [requirements](../product/requirements.md).
 The backlog has not been created; issue creation and later implementation retain their
 own approval scopes. This direction grants no live-engine or remote-write permission.
+The [design proposal](../architecture.md#commandfence-design-proposal) and
+[five Proposed ADRs](README.md#decisions) describe the implementation; they do not
+change these approved horizons.
 
 - **Last reviewed:** 2026-10-02; the new repository has no open issues.
 
@@ -15,6 +18,7 @@ own approval scopes. This direction grants no live-engine or remote-write permis
   restores the baseline while preserving unrelated policy. Before live work: accept
   the relevant engine/configuration/privilege ADRs and approve the concrete setup,
   payload, and recovery procedure. Runtime feasibility is currently unverified.
+  The detailed [human procedure](safe-poc.md) requires a concrete private live package.
 - **Manage one rule through a plain CLI.** Done when the five agreed operations follow
   the [CLI flows](../product/ux-flows.md), fixtures cover unavailable and conflicting
   engine states, and the inherited project checks pass. Replace the sample counter/TUI

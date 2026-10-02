@@ -58,8 +58,15 @@ nothing. It starts as a skeleton; `steering-the-roadmap` is the skill that chang
 
 ## Decisions
 
-This table starts empty: the reasoning behind the starting layers is in the repository
-README's Design Philosophy. The first row is the app's first ADR.
+The [CommandFence design proposal](../architecture.md#commandfence-design-proposal)
+maps these records to the inherited layers. Every initial ADR remains Proposed; the
+owner's product-direction approval does not itself accept a record or authorize live
+work. The [safe PoC](safe-poc.md) holds the first runtime acceptance gate.
 
 | ADR | Decision | Status |
 |---|---|---|
+| [0001](adr/0001-signed-santa-and-human-poc.md) | Signed Santa, privilege boundary, human PoC | Proposed |
+| [0002](adr/0002-json-config-and-literal-rule.md) | JSON v1 capture and literal rule generation | Proposed |
+| [0003](adr/0003-owned-state-and-conservative-mutations.md) | Root-owned receipt, conflict handling, targeted recovery | Proposed |
+| [0004](adr/0004-synchronous-ports-and-evidence-status.md) | Synchronous domain ports and evidence status | Proposed |
+| [0005](adr/0005-cli-shape-and-presentation-lock.md) | Five-command CLI and presentation lock | Proposed |

@@ -57,7 +57,9 @@ floor.
   [CLI flows](docs/product/ux-flows.md), output policy in
   [UX guidelines](docs/design/ux-guidelines.md), and presentation references in
   [design direction](docs/design/design-direction.md). Later architecture decisions use
-  Proposed ADRs under `docs/architecture/`; only the human accepts an ADR.
+  [the design proposal](docs/architecture.md#commandfence-design-proposal), Proposed
+  ADRs under `docs/architecture/`, and [the safe PoC](docs/architecture/safe-poc.md);
+  only the human accepts an ADR.
 
 ## Quick Reference
 

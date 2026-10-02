@@ -7,6 +7,165 @@ ever ships releases — is recorded as ADRs under [`docs/architecture/`](archite
 `README.md` is the index. The reasoning behind the layers themselves is the README's
 [Design Philosophy](../README.md#design-philosophy).
 
+## CommandFence design proposal
+
+Status: Proposed, 2026-10-02. This section describes the intended product; the layers
+below still document the implemented template scaffold. The five product commands,
+owned-rule storage, and Santa enforcement have not been implemented or verified.
+Scope is fixed by the [requirements](product/requirements.md); acceptance of an ADR
+does not authorize installation, OS grants, or a live rule change.
+
+### Principles and shape
+
+- Generate one literal execution rule from captured configuration. No shell parsing,
+  arbitrary CEL, automatic reload, or implicit home substitution.
+- Santa owns execution authorization. CommandFence owns configuration and explicit
+  operations; it adds no service, system extension, or direct Endpoint Security client.
+- Decide in core; perform I/O in adapters. Keep the current workspace, hooks, platforms
+  used by CI, lint levels, and coverage floors.
+- Require affirmative evidence before a mutation. Missing data is uncertainty, and a
+  successful submission is different from verified registration or observed denial.
+- Preserve policy outside the one owned identity. Stop on conflicts; retain evidence
+  instead of retrying or restoring a whole database.
+
+```mermaid
+flowchart LR
+  Owner[Owner edits config] --> CLI[Five plain CLI commands]
+  CLI --> Core[Core: validation, rule, operation, status]
+  Core --> Config[ConfigSource]
+  Core --> State[RuleStateStore]
+  Core --> Engine[ExecutionEngine]
+  Engine --> Santa[Packaged santactl and signed Santa]
+  Santa --> Exec[Execution authorization]
+```
+
+Module paths and port names below are proposed implementation homes, not current APIs.
+
+| Responsibility | Home | Boundary |
+|---|---|---|
+| Config v1 validation and deterministic rule generation | `command-fence-core/src/config.rs`, `rule.rs` | Bytes in; typed config/rule or typed error out. |
+| Apply/remove decisions and recovery classification | `command-fence-core/src/operation/` | `ConfigSource`, `ExecutionEngine`, `RuleStateStore`, existing `Clock`. |
+| Engine/rule/manual-evidence view | `command-fence-core/src/status.rs` | Structured observations in; one `StatusView` out. |
+| Bounded config reads | `command-fence-platform/src/config.rs` | Capture contents and file identity once. |
+| Santa processes and observation parsing | `command-fence-platform/src/santa/` | Fixed packaged tool, argument arrays, no shell or elevation. |
+| Receipt, lock, journal, manual summary | `command-fence-platform/src/state/` | Trusted state writes; separate user-authored manual evidence. |
+| Fakes and shared port contracts | `command-fence-test-support` | Model failures and call order without a live engine. |
+| Composition, commands, English output | `command-fence/src/main.rs`, `wording.rs` | Translate arguments and core views, preserve 0/1/2 exits. |
+
+The three new ports are synchronous `Send + Sync` traits over core-owned types
+([ADR-0004](architecture/adr/0004-synchronous-ports-and-evidence-status.md)). A state
+transaction returns a scoped lease that holds the CommandFence lock through readback
+and commit; all paths release it. Core neither reads files nor starts processes.
+
+### Data and contracts
+
+| Record | Intended contract |
+|---|---|
+| Config v1 | Existing agreed schema, at most 64 KiB; exactly one `/bin/ls` rule and one literal absolute home argument. [ADR-0002](architecture/adr/0002-json-config-and-literal-rule.md). |
+| Generated rule | `SIGNINGID`, `platform:com.apple.ls`, `CEL`; deterministic supported fields and escaped string literals. Config ID is a local label, not a second Santa identity. |
+| Applied receipt v1 | Config binding, monotonic generation, complete owned rule, engine version, last successful apply, and latest verified operation. Root-owned; see [ADR-0003](architecture/adr/0003-owned-state-and-conservative-mutations.md). |
+| Recovery journal v1 | One pending or most recent operation: prior receipt, prior owned content/absence, captured payload, complete exported execution-rule baseline, and operation phase. Root-private. |
+| Manual summary v1 | Latest human observation beside config as `poc.json`, mode 0600; observation time, versions, receipt generation, case results, and restoration result. Never establishes ownership. |
+| Status JSON v1 | `version`, `observed_at_unix_ms`, `engine`, `rule`, `configuration`, `last_operation`, `runtime_verification`; timestamps are UTC Unix milliseconds or null. |
+
+Store complete values for comparison rather than introducing a hashing dependency.
+Compare rule sets by typed identity/content with stable ordering; unknown fields or
+unsupported representations stop privileged operations rather than being discarded.
+No actual local config, baseline, receipt, manual report, permission file, or backup
+belongs in this public checkout.
+
+Initial v1 field layouts below are proposals to pin in fixtures. Unknown versions and
+duplicate fields are rejected; absent observations use null, not a default success.
+
+| Record/group | Fields and types |
+|---|---|
+| Receipt | `version: 1`, `generation: u64`, `binding: {config_locator: string, owner_uid: u32}`, `owned_rule: rule-or-null`, `last_successful_apply: operation-or-null`, `last_operation: operation`. |
+| Operation | `kind: applied/removed`, `generation: u64`, `at_unix_ms: i64`, `engine_version: string`; a successful apply also captures the full rule. |
+| Recovery | `version: 1`, `generation: u64`, `kind: apply/remove`, `phase: prepared/submitted/verified/receipt_committed/complete`, `prior_receipt: receipt-or-null`, `prior_owned_rule: rule-or-null`, `desired_rule: rule-or-null`, `baseline: complete-export`, `binding`, `at_unix_ms`. |
+| Manual summary | `version: 1`, `tested_at_unix_ms: i64`, `engine_version: string`, `os_version: string`, `command_fence_version: string`, `receipt_generation: u64`, `rule`, `boot_marker: string-or-null`, `cases: [{id: string, result: pass/fail/inconclusive}]`, `restoration: verified/incomplete`. Case IDs come from the PoC matrix; missing cases cannot establish a pass. |
+| Status `engine` | `state`, `version: string-or-null`, `mode: string-or-null`. |
+| Status `rule` | `state`, `identity: string-or-null`, `verified_at_unix_ms: i64-or-null`. |
+| Status `configuration` | `state`. |
+| Status `last_operation` | Null or `{kind, generation, at_unix_ms, engine_version}`. |
+| Status `runtime_verification` | `state`, `tested_at_unix_ms: i64-or-null`, `engine_version: string-or-null`, `receipt_generation: u64-or-null`. |
+
+The generation advances only on a verified operation; an unchanged idempotent apply
+does not advance it. Checked arithmetic rejects exhaustion. Manual summary input is
+limited to 64 KiB and never authorizes an engine mutation. Public status does not
+print config locators, target arguments, baseline rules, or raw engine diagnostics.
+
+### Core operations
+
+`validate` and `preview`: capture bounded input → validate v1 → generate the fixed
+rule. No engine call or state write. Preview emits only the Santa-import JSON document.
+
+`apply`: acquire lease → validate captured config → inspect supported standalone
+engine, relevant identities and receipt → preserve and sync pending recovery evidence
+→ recheck baseline → import one captured rule → read back full content and unrelated
+exported rules → commit receipt → complete journal → report verified registration.
+If the current owned and desired rule already agree, verify and return without import.
+
+`remove`: use the explicit config locator to find the receipt, without requiring a
+valid current config → acquire lease and inspect live ownership → preserve recovery
+evidence → recheck → remove that identity → verify absence and unrelated rules → record
+removal. Keep last successful application as history; do not restore an older rule.
+
+Failure before the engine write causes no engine mutation. Failure after submission,
+including a timeout or receipt write failure, is `incomplete`: retain the old receipt
+and pending journal, exit 1, and require human inspection. No further mutation replaces
+an unresolved journal. A crash after receipt commit is reconciled read-only against
+the journal generation; no automatic engine operation follows.
+
+The local lease does not exclude other Santa administrators. The proposed operating
+precondition is a human-controlled window with no other rule writer, followed by
+fresh comparisons. The inspected CLI offers no conditional replace/remove operation;
+this design cannot eliminate the interval between the last check and the write.
+[ADR-0003](architecture/adr/0003-owned-state-and-conservative-mutations.md) leaves this
+limitation explicit for owner review.
+
+`status`: collect ordinary engine JSON plus a trusted historical receipt and optional
+manual summary → core classifies each observation → render text or JSON. Ordinary
+status never queries root-only rule commands. Explicit privileged `--verify` obtains
+fresh registration evidence without importing or executing `/bin/ls`.
+
+| Group | Initial state vocabulary |
+|---|---|
+| Engine | `not_installed`, `unavailable`, `unsupported`, `permission_issue`, `reachable` |
+| Rule | `unverified`, `not_applied`, `matching`, `missing`, `conflicting`, `incomplete` |
+| Configuration | `matching`, `pending_change`, `invalid`, `unavailable` |
+| Runtime verification | `not_recorded`, `historical_pass`, `historical_fail`, `historical_inconclusive`, `stale`, `unavailable` |
+
+Only fresh privileged readback can produce `rule.state = matching`. A readable receipt
+alone remains `unverified`. Pending edits do not describe the live rule as removed.
+Manual evidence stays historical even when bindings match; changes to rule generation,
+engine/version, or known boot/restart context make it stale. Unknown restart context
+does not become a claim of current protection. There is no unconditional protected flag.
+Normal classified status exits 0; failure of requested `--verify` exits 1 without a
+success report ([UX contract](design/ux-guidelines.md)).
+
+### Implementation and evidence gates
+
+1. Build deterministic configuration/rules and ports, then bounded Santa and state
+   adapters with fixtures. Use the existing dependencies; any addition needs approval.
+2. Build the smallest verified apply/remove slice and a reviewable live-work package.
+3. Pass the separately approved, [human-run harmless-ls PoC](architecture/safe-poc.md).
+   An unsuccessful or inconclusive result holds the first milestone and later expansion.
+4. Complete status/output contracts and replace scaffold examples in a final integrated
+   change. Do not lower the core floor while removing the sample.
+
+| Quality target | Evidence |
+|---|---|
+| Invalid config, foreign rule, managed/unknown engine, or failed baseline read causes zero mutations | Core tests using fakes and call logs. |
+| Crash, skipped import, concurrent change, and storage failure never report completed application | Operation and filesystem fault fixtures. |
+| Every adapter follows its declared port, including failures | Shared contracts against fakes and isolated adapters. |
+| JSON remains parseable; every outcome has stable streams and 0/1/2 exits | Built-binary contract tests using scratch directories. |
+| Gates preserve the owner's desktop and existing checks | `just check`; no live Santa, TTY, notification, or OS grant in a gate. |
+| The exact target is denied before execution and controls retain baseline behavior | Human PoC matrix with Santa-correlated decision evidence and targeted recovery. |
+
+The [ADR index](architecture/README.md#decisions) holds all five proposals, including
+the [plain CLI presentation lock](architecture/adr/0005-cli-shape-and-presentation-lock.md).
+The [roadmap](architecture/roadmap.md) keeps the two already approved Now outcomes.
+
 ## Layers
 
 ```text

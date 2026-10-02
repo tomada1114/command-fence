@@ -17,7 +17,11 @@ replace during implementation. They do not add product requirements. There is no
 first-version TUI, resident CommandFence process, or distribution pipeline.
 
 Start with the [requirements](docs/product/requirements.md),
-[CLI flows](docs/product/ux-flows.md), and [roadmap](docs/architecture/roadmap.md).
+[CLI flows](docs/product/ux-flows.md),
+[design proposal](docs/architecture.md#commandfence-design-proposal),
+[Proposed ADRs](docs/architecture/README.md#decisions), and
+[roadmap](docs/architecture/roadmap.md). The
+[safe PoC procedure](docs/architecture/safe-poc.md) requires separate live-work approval.
 
 ## Development quickstart
 
@@ -53,6 +57,15 @@ CLI or TUI action. The default build needs no API key.
 
 Every choice below has a reason. If you disagree with one, you know what to change and
 why it was there in the first place.
+
+### Why is CommandFence a CLI over Santa?
+
+The agreed product keeps configuration and explicit operations in a small Rust CLI
+and delegates execution authorization to the official signed engine. This avoids a
+new resident CommandFence service. The five Proposed
+[ADRs](docs/architecture/README.md#decisions) record the implementation choices and
+their limits; the [human PoC](docs/architecture/safe-poc.md) must establish runtime
+feasibility. The remaining philosophy describes the inherited development foundation.
 
 ### Why a Cargo workspace with the logic split into crates?
 
